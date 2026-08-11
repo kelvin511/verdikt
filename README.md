@@ -13,10 +13,9 @@ npx verdikt scan          # scan all branches' history and save ADRs to /verdikt
 npx verdikt serve         # browse them at http://localhost:4949
 ```
 
-Add `--ai` to `scan` to have Claude draft a fuller ADR from the commit diff
-(requires `ANTHROPIC_API_KEY` in your environment). Without `--ai`, ADRs are
-generated from the commit/PR title and description directly — no API key
-needed.
+Add `--ai` to `scan` to have an LLM draft a fuller ADR from the commit diff.
+Without `--ai`, ADRs are generated from the commit/PR title and description
+directly — no API key needed at all.
 
 ## How it works
 
@@ -36,19 +35,39 @@ flow, for repos that live on GitHub and follow a PR workflow.
 - Node.js 18+
 - Optional: [GitHub CLI](https://cli.github.com/) (`gh`), authenticated via
   `gh auth login` — only needed for `--source github`
-- Optional: an `ANTHROPIC_API_KEY` environment variable, only needed for `--ai`
+- Optional, only for `--ai`: an API key for one AI provider (see below)
+
+## AI providers
+
+`--ai` works with any of these — pick whichever you have a key for. If you
+don't pass `--provider`, Verdikt checks your environment in this order and
+uses the first one it finds a key for, favoring the free-tier options:
+
+| Provider | `--provider` value | Environment variable | Notes |
+|---|---|---|---|
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | Free-tier models available — get a key at [openrouter.ai/keys](https://openrouter.ai/keys) |
+| Google Gemini | `google` | `GOOGLE_API_KEY` or `GEMINI_API_KEY` | Free tier — get a key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | Paid — get a key at [console.anthropic.com](https://console.anthropic.com/settings/keys) |
+
+Override the model for whichever provider you're using with `VERDIKT_MODEL`
+(defaults: `meta-llama/llama-3.3-70b-instruct:free` for OpenRouter,
+`gemini-2.0-flash` for Google, `claude-opus-5` for Anthropic). Force a
+specific provider regardless of what keys are set with `--provider` or
+`VERDIKT_AI_PROVIDER`.
 
 ## CLI reference
 
 ```bash
-verdikt scan [--all] [--ai] [--source <git|github>] [--limit <n>] [--since <date>] [--size-threshold <n>]
+verdikt scan [--all] [--dry-run] [--ai] [--provider <name>] [--source <git|github>] [--limit <n>] [--since <date>] [--size-threshold <n>]
 verdikt serve [-p, --port <n>]
 ```
 
 | Flag | Default | Description |
 |---|---|---|
 | `--all` | off | Generate ADRs for every candidate without an interactive prompt |
-| `--ai` | off | Draft the ADR body with Claude from the diff + description |
+| `--dry-run` | off | Show which ADRs would be generated, without drafting or writing anything |
+| `--ai` | off | Draft the ADR body from the diff + description using an AI provider |
+| `--provider` | auto-detected | Which AI provider to use for `--ai` — see the table above |
 | `--source` | `git` | `git` scans full history across all branches; `github` scans merged PRs via `gh` |
 | `--limit` | 200 (git) / 50 (github) | How many commits or merged PRs to consider |
 | `--since` | none | Only include commits after this point, e.g. `30 days ago` or `2026-01-01` (git source only) |
@@ -77,6 +96,25 @@ To iterate on the dashboard with hot reload against a running CLI server:
 ```bash
 node packages/cli/dist/index.js serve   # terminal 1
 npm run dev:dashboard                   # terminal 2 — proxies /api to :4949
+```
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) builds the
+monorepo and smoke-tests the compiled CLI on every push and PR against `main`.
+
+## Publishing
+
+`packages/cli/package.json` already points `repository`/`homepage`/`bugs` at
+`github.com/kelvin511/verdikt` — update that if the repo ends up somewhere
+else. Before the first publish, also confirm the `verdikt` name is available
+on npm (`npm view verdikt`) — rename in `packages/cli/package.json` if it's
+taken.
+
+Then, from the repo root:
+
+```bash
+npm run build          # builds the dashboard and copies it into packages/cli
+cd packages/cli
+npm publish            # prepublishOnly refuses to run if the dashboard wasn't built
 ```
 
 ## License

@@ -1,10 +1,11 @@
 import prompts from "prompts";
+import ora from "ora";
 import { findRepoRoot, verdiktDir } from "../lib/paths.js";
 import { listMergedPullRequests, getPullRequestDiff, prToCandidate } from "../lib/github.js";
 import { listGitCandidates, getCommitDiff } from "../lib/gitlog.js";
 import { filterCandidates } from "../lib/heuristics.js";
 import { buildADRMarkdown, saveADR, templateCandidate } from "../lib/adr.js";
-import { draftADR } from "../lib/claude.js";
+import { resolveAIProvider } from "../lib/ai/index.js";
 import type { Candidate } from "../lib/types.js";
 
 export type ScanSource = "git" | "github";
@@ -12,6 +13,8 @@ export type ScanSource = "git" | "github";
 export interface ScanOptions {
   all?: boolean;
   ai?: boolean;
+  provider?: string;
+  dryRun?: boolean;
   source?: ScanSource;
   limit?: number;
   sizeThreshold?: number;
@@ -20,16 +23,29 @@ export interface ScanOptions {
 
 async function fetchCandidates(repoRoot: string, options: ScanOptions): Promise<Candidate[]> {
   if (options.source === "github") {
-    console.log("Fetching merged pull requests via gh CLI...");
-    const prs = await listMergedPullRequests(options.limit ?? 50);
-    return prs.map(prToCandidate);
+    const spinner = ora("Fetching merged pull requests via gh CLI...").start();
+    try {
+      const prs = await listMergedPullRequests(options.limit ?? 50);
+      spinner.succeed(`Fetched ${prs.length} merged pull request(s).`);
+      return prs.map(prToCandidate);
+    } catch (err) {
+      spinner.fail("Failed to fetch pull requests.");
+      throw err;
+    }
   }
 
-  console.log("Scanning git history across all branches...");
-  return listGitCandidates(repoRoot, {
-    limit: options.limit ?? 200,
-    since: options.since,
-  });
+  const spinner = ora("Scanning git history across all branches...").start();
+  try {
+    const candidates = await listGitCandidates(repoRoot, {
+      limit: options.limit ?? 200,
+      since: options.since,
+    });
+    spinner.succeed(`Scanned ${candidates.length} commit(s) across all branches.`);
+    return candidates;
+  } catch (err) {
+    spinner.fail("Failed to scan git history.");
+    throw err;
+  }
 }
 
 async function fetchDiff(repoRoot: string, candidate: Candidate): Promise<string> {
@@ -52,6 +68,9 @@ function describeCandidate(c: Candidate): string {
 }
 
 export async function runScan(options: ScanOptions): Promise<void> {
+  // Fail fast on a missing/misconfigured AI provider before doing any work.
+  const provider = options.ai ? resolveAIProvider(options.provider) : null;
+
   const repoRoot = await findRepoRoot();
   const outDir = verdiktDir(repoRoot);
 
@@ -85,12 +104,31 @@ export async function runScan(options: ScanOptions): Promise<void> {
     return;
   }
 
+  if (options.dryRun) {
+    console.log(`\nDry run — would generate ${selected.length} ADR(s), nothing written:\n`);
+    for (const candidate of selected) {
+      const { filename } = buildADRMarkdown(candidate, "");
+      console.log(`  verdikt/${filename}`);
+    }
+    return;
+  }
+
   for (const candidate of selected) {
     let body: string;
-    if (options.ai) {
-      console.log(`Drafting ADR for ${candidate.id} with Claude...`);
-      const diff = await fetchDiff(repoRoot, candidate);
-      body = await draftADR({ title: candidate.title, description: candidate.description, diff });
+    if (provider) {
+      const spinner = ora(`Drafting ADR for ${candidate.id} with ${provider.name}...`).start();
+      try {
+        const diff = await fetchDiff(repoRoot, candidate);
+        body = await provider.draftADR({
+          title: candidate.title,
+          description: candidate.description,
+          diff,
+        });
+        spinner.succeed(`Drafted ADR for ${candidate.id} with ${provider.name}.`);
+      } catch (err) {
+        spinner.fail(`Failed to draft ADR for ${candidate.id}.`);
+        throw err;
+      }
     } else {
       body = templateCandidate(candidate);
     }

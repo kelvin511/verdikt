@@ -14,7 +14,12 @@ program
   .command("scan")
   .description("Scan git history (or merged GitHub PRs) and generate ADRs")
   .option("--all", "Generate ADRs for every candidate without prompting")
-  .option("--ai", "Use the Claude API to draft a fuller ADR from the diff")
+  .option("--dry-run", "Show which ADRs would be generated without writing or drafting anything")
+  .option("--ai", "Draft a fuller ADR from the diff using an AI provider")
+  .option(
+    "--provider <anthropic|openrouter|google>",
+    "AI provider for --ai. Defaults to whichever of OPENROUTER_API_KEY, GOOGLE_API_KEY/GEMINI_API_KEY, or ANTHROPIC_API_KEY is set (checked in that order)."
+  )
   .option(
     "--source <git|github>",
     "Where to look for decisions: full git history across all branches (default), or merged GitHub PRs via gh",

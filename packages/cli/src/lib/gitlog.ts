@@ -36,7 +36,18 @@ export async function listGitCandidates(
   if (options.since) args.push(`--since=${options.since}`);
   if (options.limit) args.push(`--max-count=${options.limit}`);
 
-  const raw = await git.raw(args);
+  let raw: string;
+  try {
+    raw = await git.raw(args);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (/does not have any commits yet|unknown revision or path/i.test(message)) {
+      // A freshly-initialized repo with no commits. Nothing to scan yet.
+      return [];
+    }
+    throw new Error(`Failed to read git history.\n${message}`);
+  }
+
   const records = raw
     .split(RECORD_SEP)
     .map((r) => r.trim())

@@ -1,7 +1,7 @@
 {
   "name": "verdikt",
   "version": "0.1.0",
-  "description": "Turn merged pull requests into readable Architectural Decision Records — local-first, no cloud.",
+  "description": "Turn your git history into readable Architectural Decision Records — local-first, no cloud, works on any repo.",
   "type": "module",
   "bin": {
     "verdikt": "./dist/index.js"
@@ -11,18 +11,38 @@
     "dashboard-dist"
   ],
   "license": "MIT",
+  "keywords": [
+    "adr",
+    "architectural-decision-records",
+    "git",
+    "cli",
+    "documentation",
+    "changelog"
+  ],
+  "homepage": "https://github.com/kelvin511/verdikt#readme",
+  "bugs": {
+    "url": "https://github.com/kelvin511/verdikt/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kelvin511/verdikt.git",
+    "directory": "packages/cli"
+  },
   "engines": {
     "node": ">=18"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "tsc -p tsconfig.json --watch"
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "prepublishOnly": "node scripts/check-dashboard-built.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
     "commander": "^12.1.0",
     "express": "^4.21.0",
     "gray-matter": "^4.0.3",
+    "ora": "^8.1.0",
     "prompts": "^2.4.2",
     "simple-git": "^3.27.0"
   },
