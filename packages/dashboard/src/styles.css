@@ -1,0 +1,85 @@
+:root {
+  color-scheme: light dark;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0f1115;
+  color: #e6e6e6;
+}
+
+.app {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.app-header h1 {
+  margin-bottom: 0.15rem;
+}
+
+.app-header p {
+  margin-top: 0;
+  color: #9aa0a6;
+}
+
+.adr-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.adr-list a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #262b33;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  background: #171a21;
+  transition: border-color 0.15s ease;
+}
+
+.adr-list a:hover {
+  border-color: #4c8bf5;
+}
+
+.adr-title {
+  font-weight: 600;
+}
+
+.adr-meta {
+  color: #9aa0a6;
+  font-size: 0.85rem;
+}
+
+.adr-detail h2 {
+  margin-bottom: 0.25rem;
+}
+
+.adr-detail {
+  line-height: 1.6;
+}
+
+.adr-detail pre {
+  background: #171a21;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.error {
+  color: #f87171;
+}
+
+code {
+  background: #171a21;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}

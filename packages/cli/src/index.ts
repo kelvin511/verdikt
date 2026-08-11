@@ -1,0 +1,63 @@
+#!/usr/bin/env node
+import { Command } from "commander";
+import { runScan } from "./commands/scan.js";
+import { runServe } from "./commands/serve.js";
+
+const program = new Command();
+
+program
+  .name("verdikt")
+  .description("Turn your git history into readable Architectural Decision Records.")
+  .version("0.1.0");
+
+program
+  .command("scan")
+  .description("Scan git history (or merged GitHub PRs) and generate ADRs")
+  .option("--all", "Generate ADRs for every candidate without prompting")
+  .option("--ai", "Use the Claude API to draft a fuller ADR from the diff")
+  .option(
+    "--source <git|github>",
+    "Where to look for decisions: full git history across all branches (default), or merged GitHub PRs via gh",
+    "git"
+  )
+  .option(
+    "--limit <n>",
+    "Number of commits (git) or merged PRs (github) to consider. Defaults: 200 for git, 50 for github.",
+    (v) => parseInt(v, 10)
+  )
+  .option(
+    "--since <date>",
+    "Only consider commits after this point, e.g. '30 days ago' or '2026-01-01' (git source only)"
+  )
+  .option(
+    "--size-threshold <n>",
+    "Minimum lines changed to be considered a candidate",
+    (v) => parseInt(v, 10),
+    100
+  )
+  .action(async (opts) => {
+    try {
+      if (opts.source !== "git" && opts.source !== "github") {
+        throw new Error(`Invalid --source "${opts.source}". Use "git" or "github".`);
+      }
+      await runScan(opts);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      process.exitCode = 1;
+    }
+  });
+
+program
+  .command("serve")
+  .description("Launch the local dashboard")
+  .option("-p, --port <n>", "Port to serve on", (v) => parseInt(v, 10), 4949)
+  .action(async (opts) => {
+    try {
+      await runServe(opts);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      process.exitCode = 1;
+    }
+  });
+
+program.parseAsync(process.argv);

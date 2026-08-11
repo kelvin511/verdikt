@@ -1,0 +1,15 @@
+{
+  "name": "verdikt-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Monorepo for Verdikt — a local CLI + dashboard that turns merged PRs into ADRs.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=packages/dashboard && node scripts/copy-dashboard.mjs && npm run build --workspace=packages/cli",
+    "dev:dashboard": "npm run dev --workspace=packages/dashboard",
+    "dev:cli": "npm run dev --workspace=packages/cli"
+  },
+  "license": "MIT"
+}
