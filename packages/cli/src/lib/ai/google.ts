@@ -1,9 +1,12 @@
 import type { AIProvider, DraftADRInput } from "./types.js";
 import { MAX_DIFF_CHARS, SYSTEM_PROMPT, buildUserPrompt } from "./shared.js";
 
-// Gemini Flash models have a free tier on Google AI Studio. Override with
-// VERDIKT_MODEL if Google renames or retires this one.
-const DEFAULT_MODEL = "gemini-2.0-flash";
+// "-latest" is a rolling alias Google maintains, so this stays valid even
+// as they retire specific dated models (gemini-2.0-flash, for one, is
+// already gone as of 2026-08). Confirm current options any time via:
+//   GET https://generativelanguage.googleapis.com/v1beta/models?key=$GOOGLE_API_KEY
+// Override with VERDIKT_MODEL if you want to pin a specific version.
+const DEFAULT_MODEL = "gemini-flash-latest";
 
 interface GeminiResponse {
   candidates?: { content?: { parts?: { text?: string }[] } }[];

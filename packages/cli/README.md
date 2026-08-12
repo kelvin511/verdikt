@@ -67,7 +67,7 @@ the first one it finds a key for, favoring the free-tier options:
 
 Override the model for whichever provider you're using with `VERDIKT_MODEL`
 (defaults: `meta-llama/llama-3.3-70b-instruct:free` for OpenRouter,
-`gemini-2.0-flash` for Google, `claude-opus-5` for Anthropic). Force a
+`gemini-flash-latest` for Google, `claude-opus-5` for Anthropic). Force a
 specific provider regardless of what keys are set with `--provider` or
 `VERDIKT_AI_PROVIDER`.
 
