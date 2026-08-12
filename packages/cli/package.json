@@ -4,7 +4,7 @@
   "description": "Turn your git history into readable Architectural Decision Records — local-first, no cloud, works on any repo.",
   "type": "module",
   "bin": {
-    "verdikt": "./dist/index.js"
+    "verdikt": "dist/index.js"
   },
   "files": [
     "dist",
