@@ -1,5 +1,8 @@
 # Verdikt
 
+[![CI](https://github.com/kelvin511/verdikt/actions/workflows/ci.yml/badge.svg)](https://github.com/kelvin511/verdikt/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A local CLI + dashboard that turns your git history into readable
 Architectural Decision Records (ADRs) — no cloud, no GitHub App, no server.
 Everything runs on your machine, and it works on any git repo — GitHub,
@@ -117,6 +120,12 @@ cd packages/cli
 npm publish            # prepublishOnly refuses to run if the dashboard wasn't built
 ```
 
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
+development setup, project layout, and what's in/out of scope. This project
+follows a [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
