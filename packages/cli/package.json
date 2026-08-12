@@ -40,6 +40,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
     "commander": "^12.1.0",
+    "dotenv": "^17.4.2",
     "express": "^4.21.0",
     "gray-matter": "^4.0.3",
     "ora": "^8.1.0",

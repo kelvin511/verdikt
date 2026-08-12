@@ -1,7 +1,13 @@
 #!/usr/bin/env node
+import { config as loadEnv } from "dotenv";
 import { Command } from "commander";
 import { runScan } from "./commands/scan.js";
 import { runServe } from "./commands/serve.js";
+
+// Loads a .env file from the current directory, if present — lets AI
+// provider keys live in a (gitignored) project .env instead of the shell
+// environment. Silently does nothing if there's no .env file.
+loadEnv();
 
 const program = new Command();
 

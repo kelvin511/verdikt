@@ -42,9 +42,12 @@ flow, for repos that live on GitHub and follow a PR workflow.
 
 ## AI providers
 
-`--ai` works with any of these — pick whichever you have a key for. If you
-don't pass `--provider`, Verdikt checks your environment in this order and
-uses the first one it finds a key for, favoring the free-tier options:
+`--ai` works with any of these — pick whichever you have a key for. Set the
+key as a regular environment variable, or drop it in a `.env` file in the
+directory you run `verdikt` from (copy [`.env.example`](.env.example) to
+`.env` and fill it in — it's gitignored). If you don't pass `--provider`,
+Verdikt checks your environment in this order and uses the first one it
+finds a key for, favoring the free-tier options:
 
 | Provider | `--provider` value | Environment variable | Notes |
 |---|---|---|---|
