@@ -12,9 +12,9 @@ loadEnv();
 const program = new Command();
 
 program
-  .name("verdikt")
+  .name("verdikt-adr")
   .description("Turn your git history into readable Architectural Decision Records.")
-  .version("0.1.1");
+  .version("0.1.2");
 
 program
   .command("scan")

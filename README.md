@@ -22,12 +22,12 @@ directly — no API key needed at all.
 
 ## How it works
 
-1. `verdikt scan` walks the full history of every local and remote-tracking
+1. `verdikt-adr scan` walks the full history of every local and remote-tracking
    branch (`git log --all`) and filters commits by diff size or a `[ADR]` tag
    in the message — no GitHub or `gh` involved by default.
 2. You pick which ones become ADRs (or pass `--all` to take every candidate).
 3. Each selected commit becomes a markdown file at `/verdikt/YYYY-MM-DD-slug.md`.
-4. `verdikt serve` starts a local dashboard that reads that folder.
+4. `verdikt-adr serve` starts a local dashboard that reads that folder.
 
 Prefer to work off merged GitHub PRs instead of raw commits? Pass
 `--source github` — this uses the `gh` CLI exactly like the original PR-based
@@ -44,7 +44,7 @@ flow, for repos that live on GitHub and follow a PR workflow.
 
 `--ai` works with any of these — pick whichever you have a key for. Set the
 key as a regular environment variable, or drop it in a `.env` file in the
-directory you run `verdikt` from (copy [`.env.example`](.env.example) to
+directory you run `verdikt-adr` from (copy [`.env.example`](.env.example) to
 `.env` and fill it in — it's gitignored). If you don't pass `--provider`,
 Verdikt checks your environment in this order and uses the first one it
 finds a key for, favoring the free-tier options:
@@ -70,8 +70,8 @@ specific provider regardless of what keys are set with `--provider` or
 ## CLI reference
 
 ```bash
-verdikt scan [--all] [--dry-run] [--ai] [--provider <name>] [--source <git|github>] [--limit <n>] [--since <date>] [--size-threshold <n>]
-verdikt serve [-p, --port <n>]
+verdikt-adr scan [--all] [--dry-run] [--ai] [--provider <name>] [--source <git|github>] [--limit <n>] [--since <date>] [--size-threshold <n>]
+verdikt-adr serve [-p, --port <n>]
 ```
 
 | Flag | Default | Description |
@@ -84,7 +84,7 @@ verdikt serve [-p, --port <n>]
 | `--limit` | 200 (git) / 50 (github) | How many commits or merged PRs to consider |
 | `--since` | none | Only include commits after this point, e.g. `30 days ago` or `2026-01-01` (git source only) |
 | `--size-threshold` | 100 | Minimum lines changed (additions + deletions) to count as a candidate |
-| `--port` | 4949 | Port for `verdikt serve` |
+| `--port` | 4949 | Port for `verdikt-adr serve` |
 
 A commit or PR is also a candidate regardless of size if its title/message or
 description contains `[ADR]`. Merge commits get their branch name attached
@@ -92,7 +92,7 @@ when it can be parsed from the merge message.
 
 ## Repo layout
 
-- [`packages/cli`](packages/cli) — the `verdikt-adr` npm package (CLI + local server, installs as the `verdikt` command)
+- [`packages/cli`](packages/cli) — the `verdikt-adr` npm package (CLI + local server)
 - [`packages/dashboard`](packages/dashboard) — the Vite + React dashboard, built and bundled into the CLI
 
 ## Development
@@ -116,12 +116,14 @@ monorepo and smoke-tests the compiled CLI on every push and PR against `main`.
 ## Publishing
 
 Published on npm as [`verdikt-adr`](https://www.npmjs.com/package/verdikt-adr)
-(the plain `verdikt` name was already taken). It still installs the `verdikt`
-command — only the package name differs:
+— the plain `verdikt` name was already taken by an unrelated package, and the
+CLI command is also `verdikt-adr` (not `verdikt`) so there's no ambiguity.
+**Always type the full name** — a bare `npx verdikt` silently runs that other,
+unrelated package instead of this one:
 
 ```bash
 npx verdikt-adr scan
-# or: npm install -g verdikt-adr && verdikt scan
+# or: npm install -g verdikt-adr && verdikt-adr scan
 ```
 
 `packages/cli/package.json` already points `repository`/`homepage`/`bugs` at

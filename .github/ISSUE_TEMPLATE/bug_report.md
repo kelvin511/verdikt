@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Something in verdikt scan / verdikt serve isn't working as expected
+about: Something in verdikt-adr scan / verdikt-adr serve isn't working as expected
 title: ""
 labels: bug
 ---
@@ -12,14 +12,14 @@ labels: bug
 **Command you ran** (please include all flags)
 
 ```
-verdikt scan ...
+verdikt-adr scan ...
 ```
 
 **Environment**
 
 - OS:
 - Node version (`node -v`):
-- Verdikt version (`npx verdikt --version`):
+- Verdikt version (`npx verdikt-adr --version`):
 - `--source`: git / github
 - If `--ai` was used, `--provider`:
 
