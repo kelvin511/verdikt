@@ -14,7 +14,7 @@ const program = new Command();
 program
   .name("verdikt")
   .description("Turn your git history into readable Architectural Decision Records.")
-  .version("0.1.0");
+  .version("0.1.1");
 
 program
   .command("scan")
