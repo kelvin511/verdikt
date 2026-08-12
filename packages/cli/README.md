@@ -1,12 +1,15 @@
-# Verdikt
+# verdikt-adr
 
 [![CI](https://github.com/kelvin511/verdikt/actions/workflows/ci.yml/badge.svg)](https://github.com/kelvin511/verdikt/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A local CLI + dashboard that turns your git history into readable
 Architectural Decision Records (ADRs) — no cloud, no GitHub App, no server.
-Everything runs on your machine, and it works on any git repo — GitHub,
-GitLab, Bitbucket, or fully local, no PRs required.
+Works on any git repo (GitHub, GitLab, Bitbucket, or fully local), no PRs
+required. Installs as the `verdikt` command.
+
+Full project docs, source, and issue tracker:
+[github.com/kelvin511/verdikt](https://github.com/kelvin511/verdikt).
 
 ## 60-second quickstart
 
@@ -14,6 +17,14 @@ GitLab, Bitbucket, or fully local, no PRs required.
 # from inside any git repo — no GitHub CLI or remote required
 npx verdikt-adr scan      # scan all branches' history and save ADRs to /verdikt
 npx verdikt-adr serve     # browse them at http://localhost:4949
+```
+
+Or install it once and use the shorter `verdikt` command:
+
+```bash
+npm install -g verdikt-adr
+verdikt scan
+verdikt serve
 ```
 
 Add `--ai` to `scan` to have an LLM draft a fuller ADR from the commit diff.
@@ -30,8 +41,8 @@ directly — no API key needed at all.
 4. `verdikt serve` starts a local dashboard that reads that folder.
 
 Prefer to work off merged GitHub PRs instead of raw commits? Pass
-`--source github` — this uses the `gh` CLI exactly like the original PR-based
-flow, for repos that live on GitHub and follow a PR workflow.
+`--source github` — this uses the `gh` CLI, for repos that live on GitHub and
+follow a PR workflow.
 
 ## Requirements
 
@@ -81,57 +92,10 @@ A commit or PR is also a candidate regardless of size if its title/message or
 description contains `[ADR]`. Merge commits get their branch name attached
 when it can be parsed from the merge message.
 
-## Repo layout
-
-- [`packages/cli`](packages/cli) — the `verdikt-adr` npm package (CLI + local server, installs as the `verdikt` command)
-- [`packages/dashboard`](packages/dashboard) — the Vite + React dashboard, built and bundled into the CLI
-
-## Development
-
-```bash
-npm install
-npm run build                       # builds the dashboard, then the CLI
-node packages/cli/dist/index.js scan
-```
-
-To iterate on the dashboard with hot reload against a running CLI server:
-
-```bash
-node packages/cli/dist/index.js serve   # terminal 1
-npm run dev:dashboard                   # terminal 2 — proxies /api to :4949
-```
-
-CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) builds the
-monorepo and smoke-tests the compiled CLI on every push and PR against `main`.
-
-## Publishing
-
-Published on npm as [`verdikt-adr`](https://www.npmjs.com/package/verdikt-adr)
-(the plain `verdikt` name was already taken). It still installs the `verdikt`
-command — only the package name differs:
-
-```bash
-npx verdikt-adr scan
-# or: npm install -g verdikt-adr && verdikt scan
-```
-
-`packages/cli/package.json` already points `repository`/`homepage`/`bugs` at
-`github.com/kelvin511/verdikt` — update that if the repo ends up somewhere
-else.
-
-To cut a new release from the repo root:
-
-```bash
-npm run build          # builds the dashboard and copies it into packages/cli
-cd packages/cli
-npm publish            # prepublishOnly refuses to run if the dashboard wasn't built
-```
-
 ## Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
-development setup, project layout, and what's in/out of scope. This project
-follows a [Code of Conduct](CODE_OF_CONDUCT.md).
+See [CONTRIBUTING.md](https://github.com/kelvin511/verdikt/blob/main/CONTRIBUTING.md)
+in the main repo.
 
 ## License
 
