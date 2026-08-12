@@ -65,11 +65,13 @@ the first one it finds a key for, favoring the free-tier options:
 | Google Gemini | `google` | `GOOGLE_API_KEY` or `GEMINI_API_KEY` | Free tier — get a key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
 | Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | Paid — get a key at [console.anthropic.com](https://console.anthropic.com/settings/keys) |
 
-Override the model for whichever provider you're using with `VERDIKT_MODEL`
-(defaults: `meta-llama/llama-3.3-70b-instruct:free` for OpenRouter,
-`gemini-flash-latest` for Google, `claude-opus-5` for Anthropic). Force a
-specific provider regardless of what keys are set with `--provider` or
-`VERDIKT_AI_PROVIDER`.
+OpenRouter and Google Gemini pick their model **live** at run time — Verdikt
+queries the provider's current model catalog and picks a suitable free
+text-generation model, so the default doesn't silently break when a provider
+retires or renames one. Anthropic uses a fixed alias (`claude-opus-5`) since
+Claude model names don't rotate the same way. Override any of this with
+`VERDIKT_MODEL` to pin an exact model, or force a specific provider
+regardless of what keys are set with `--provider` or `VERDIKT_AI_PROVIDER`.
 
 ## CLI reference
 

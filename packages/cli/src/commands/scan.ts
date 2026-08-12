@@ -119,12 +119,13 @@ export async function runScan(options: ScanOptions): Promise<void> {
       const spinner = ora(`Drafting ADR for ${candidate.id} with ${provider.name}...`).start();
       try {
         const diff = await fetchDiff(repoRoot, candidate);
-        body = await provider.draftADR({
+        const result = await provider.draftADR({
           title: candidate.title,
           description: candidate.description,
           diff,
         });
-        spinner.succeed(`Drafted ADR for ${candidate.id} with ${provider.name}.`);
+        body = result.content;
+        spinner.succeed(`Drafted ADR for ${candidate.id} with ${provider.name} (${result.model}).`);
       } catch (err) {
         spinner.fail(`Failed to draft ADR for ${candidate.id}.`);
         throw err;
