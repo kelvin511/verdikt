@@ -17,8 +17,13 @@ npx verdikt-adr serve     # browse them at http://localhost:4949
 ```
 
 Add `--ai` to `scan` to have an LLM draft a fuller ADR from the commit diff.
-Without `--ai`, ADRs are generated from the commit/PR title and description
-directly — no API key needed at all.
+Without `--ai`, ADRs are still generated from real analysis, not just the raw
+commit message — no API key needed at all: Verdikt parses the diff itself
+(files added/modified/deleted/renamed, grouped by directory), classifies the
+commit type from a conventional-commit prefix (`feat:`, `fix:`, `refactor:`,
+etc.) if present, pulls out bullet points from the message body, and flags a
+few consequences it can actually infer (dependency-manifest changes, CI
+workflow changes, file deletions).
 
 ## How it works
 

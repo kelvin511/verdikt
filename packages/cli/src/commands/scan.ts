@@ -6,6 +6,7 @@ import { listGitCandidates, getCommitDiff } from "../lib/gitlog.js";
 import { filterCandidates } from "../lib/heuristics.js";
 import { buildADRMarkdown, saveADR, templateCandidate } from "../lib/adr.js";
 import { resolveAIProvider } from "../lib/ai/index.js";
+import { summarizeDiff } from "../lib/diffsummary.js";
 import type { Candidate } from "../lib/types.js";
 
 export type ScanSource = "git" | "github";
@@ -131,7 +132,8 @@ export async function runScan(options: ScanOptions): Promise<void> {
         throw err;
       }
     } else {
-      body = templateCandidate(candidate);
+      const diff = await fetchDiff(repoRoot, candidate);
+      body = templateCandidate(candidate, summarizeDiff(diff));
     }
 
     const adr = buildADRMarkdown(candidate, body);
