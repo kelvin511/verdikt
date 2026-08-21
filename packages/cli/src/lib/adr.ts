@@ -3,6 +3,7 @@ import path from "node:path";
 import matter from "gray-matter";
 import type { Candidate } from "./types.js";
 import { formatFileList, topDirectories, type FileChangeSummary } from "./diffsummary.js";
+import type { SymbolChange } from "./codeanalysis.js";
 
 function slugify(title: string): string {
   return (
@@ -121,7 +122,26 @@ function inferConsequences(files: FileChangeSummary | undefined): string | null 
   return notes.length > 0 ? notes.map((n) => `- ${n}`).join("\n") : null;
 }
 
-export function templateCandidate(candidate: Candidate, files?: FileChangeSummary): string {
+const MAX_SYMBOL_CHANGES_SHOWN = 15;
+
+function renderSymbolChanges(symbolChanges: SymbolChange[]): string[] {
+  const shown = symbolChanges.slice(0, MAX_SYMBOL_CHANGES_SHOWN);
+  const lines = shown.map((sc) => {
+    const verb = sc.change === "added" ? "Added" : sc.change === "removed" ? "Removed" : "Changed";
+    const detail = sc.detail ? ` — \`${sc.detail}\`` : "";
+    return `- ${verb} ${sc.kind} \`${sc.name}\` in \`${sc.file}\`${detail}`;
+  });
+  if (symbolChanges.length > shown.length) {
+    lines.push(`- ...and ${symbolChanges.length - shown.length} more code-level change(s)`);
+  }
+  return lines;
+}
+
+export function templateCandidate(
+  candidate: Candidate,
+  files?: FileChangeSummary,
+  symbolChanges?: SymbolChange[]
+): string {
   const lines: string[] = [];
 
   // Context: where this came from, then what it touched (files first).
@@ -158,6 +178,10 @@ export function templateCandidate(candidate: Candidate, files?: FileChangeSummar
       );
     }
     if (fileLines.length > 0) lines.push("", ...fileLines);
+  }
+
+  if (symbolChanges && symbolChanges.length > 0) {
+    lines.push("", "**Code-level changes:**", ...renderSymbolChanges(symbolChanges));
   }
   lines.push("");
 

@@ -45,12 +45,12 @@
     "gray-matter": "^4.0.3",
     "ora": "^8.1.0",
     "prompts": "^2.4.2",
-    "simple-git": "^3.27.0"
+    "simple-git": "^3.27.0",
+    "typescript": "^5.7.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.10.0",
-    "@types/prompts": "^2.4.9",
-    "typescript": "^5.7.0"
+    "@types/prompts": "^2.4.9"
   }
 }

@@ -7,6 +7,7 @@ import { filterCandidates } from "../lib/heuristics.js";
 import { buildADRMarkdown, saveADR, templateCandidate } from "../lib/adr.js";
 import { resolveAIProvider } from "../lib/ai/index.js";
 import { summarizeDiff } from "../lib/diffsummary.js";
+import { analyzeCodeChanges, toAnalyzableFiles, type SymbolChange } from "../lib/codeanalysis.js";
 import type { Candidate } from "../lib/types.js";
 
 export type ScanSource = "git" | "github";
@@ -57,6 +58,29 @@ async function fetchDiff(repoRoot: string, candidate: Candidate): Promise<string
     return getCommitDiff(repoRoot, candidate.sha, candidate.parentSha);
   }
   return "";
+}
+
+/**
+ * Only git-sourced candidates get symbol-level code analysis — it needs
+ * `git show ref:path` to fetch both file versions, which has no equivalent
+ * for a GitHub PR without extra API calls (github-source ADRs still get the
+ * file-level summary, just not this layer).
+ */
+async function analyzeCandidateCode(
+  repoRoot: string,
+  candidate: Candidate,
+  diff: string
+): Promise<SymbolChange[]> {
+  if (candidate.source !== "git" || !candidate.sha) return [];
+  const files = toAnalyzableFiles(summarizeDiff(diff));
+  if (files.length === 0) return [];
+  const parentRef = candidate.parentSha ?? `${candidate.sha}^`;
+  try {
+    return await analyzeCodeChanges(repoRoot, candidate.sha, parentRef, files);
+  } catch {
+    // Best-effort — a parse failure or missing ref shouldn't block the ADR.
+    return [];
+  }
 }
 
 function describeCandidate(c: Candidate): string {
@@ -133,7 +157,8 @@ export async function runScan(options: ScanOptions): Promise<void> {
       }
     } else {
       const diff = await fetchDiff(repoRoot, candidate);
-      body = templateCandidate(candidate, summarizeDiff(diff));
+      const symbolChanges = await analyzeCandidateCode(repoRoot, candidate, diff);
+      body = templateCandidate(candidate, summarizeDiff(diff), symbolChanges);
     }
 
     const adr = buildADRMarkdown(candidate, body);

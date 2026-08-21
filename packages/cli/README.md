@@ -37,6 +37,14 @@ etc.) if present, pulls out bullet points from the message body, and flags a
 few consequences it can actually infer (dependency-manifest changes, CI
 workflow changes, file deletions).
 
+For TypeScript/JavaScript files on the `git` source, it goes further: it
+parses the before/after version of each changed file with the TypeScript
+compiler API — not regex — and reports the exact top-level functions,
+classes, interfaces, and type aliases that were added, removed, or had
+their signature change. Using a real parser means a comment or string
+that merely looks like a declaration is never mistaken for one. This adds
+`typescript` (~23 MB) to the install.
+
 ## How it works
 
 1. `verdikt-adr scan` walks the full history of every local and remote-tracking
