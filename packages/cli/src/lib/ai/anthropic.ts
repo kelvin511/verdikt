@@ -4,8 +4,9 @@ import { MAX_DIFF_CHARS, SYSTEM_PROMPT, buildUserPrompt } from "./shared.js";
 
 // Anthropic's aliases (like this one) are stable, curated pointers, not a
 // rotating free-tier lineup — no live-fetch self-healing needed here the
-// way OpenRouter/Google's free models require.
-const DEFAULT_MODEL = "claude-opus-5-5";
+// way OpenRouter/Google's free models require. Haiku is the cheapest tier
+// and plenty for a three-section ADR; set VERDIKT_MODEL for a bigger model.
+const DEFAULT_MODEL = "claude-haiku-5-5";
 
 export const anthropicProvider: AIProvider = {
   name: "Anthropic Claude",

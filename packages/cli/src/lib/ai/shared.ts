@@ -21,3 +21,24 @@ export function buildUserPrompt(input: DraftADRInput, diff: string): string {
     diff || "(no diff available)",
   ].join("\n");
 }
+
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503]);
+const MAX_RETRIES = 3;
+
+/**
+ * fetch() that backs off and retries rate-limit/overload responses. Free
+ * tiers (Gemini, OpenRouter) return 429s quickly once several ADRs draft in
+ * parallel; without this one throttled request would abort the whole scan.
+ */
+export async function fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, init);
+    if (!RETRYABLE_STATUS.has(res.status) || attempt === MAX_RETRIES) return res;
+
+    const retryAfter = Number(res.headers.get("retry-after"));
+    const delayMs = Number.isFinite(retryAfter) && retryAfter > 0
+      ? retryAfter * 1000
+      : 2000 * 2 ** attempt;
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+}

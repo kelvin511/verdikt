@@ -1,5 +1,5 @@
 import type { AIProvider, DraftADRInput, DraftADRResult } from "./types.js";
-import { MAX_DIFF_CHARS, SYSTEM_PROMPT, buildUserPrompt } from "./shared.js";
+import { MAX_DIFF_CHARS, SYSTEM_PROMPT, buildUserPrompt, fetchWithRetry } from "./shared.js";
 
 // Last-resort fallback if the live model list can't be fetched. Google
 // retires dated model versions over time — the real source of truth is the
@@ -82,7 +82,7 @@ export const googleProvider: AIProvider = {
       model
     )}:generateContent?key=${apiKey}`;
 
-    const res = await fetch(url, {
+    const res = await fetchWithRetry(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

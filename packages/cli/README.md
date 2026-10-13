@@ -82,8 +82,8 @@ the first one it finds a key for, favoring the free-tier options:
 OpenRouter and Google Gemini pick their model **live** at run time — Verdikt
 queries the provider's current model catalog and picks a suitable free
 text-generation model, so the default doesn't silently break when a provider
-retires or renames one. Anthropic uses a fixed alias (`claude-opus-5-5`) since
-Claude model names don't rotate the same way. Override any of this with
+retires or renames one. Anthropic defaults to its cheapest model
+(`claude-haiku-5-5`) since Claude model names don't rotate the same way. Override any of this with
 `VERDIKT_MODEL` to pin an exact model, or force a specific provider
 regardless of what keys are set with `--provider` or `VERDIKT_AI_PROVIDER`.
 
@@ -121,7 +121,7 @@ releases hardcoded model names that providers have since retired.
 ## CLI reference
 
 ```bash
-verdikt-adr scan [--all] [--dry-run] [--ai] [--provider <name>] [--source <git|github>] [--limit <n>] [--since <date>] [--size-threshold <n>]
+verdikt-adr scan [--all] [--dry-run] [--ai] [--provider <name>] [--source <git|github>] [--limit <n>] [--since <date>] [--size-threshold <n>] [--force] [--concurrency <n>]
 verdikt-adr serve [-p, --port <n>]
 ```
 
@@ -135,6 +135,8 @@ verdikt-adr serve [-p, --port <n>]
 | `--limit` | 200 (git) / 50 (github) | How many commits or merged PRs to consider |
 | `--since` | none | Only include commits after this point, e.g. `30 days ago` or `2026-01-01` (git source only) |
 | `--size-threshold` | 100 | Minimum lines changed (additions + deletions) to count as a candidate |
+| `--force` | off | Regenerate ADRs that already exist. Without it, re-runs skip commits that already have an ADR file (so hand edits are kept) |
+| `--concurrency` | 4 | How many ADRs to generate in parallel. Lower it if a free-tier AI provider keeps rate-limiting you |
 | `--port` | 4949 | Port for `verdikt-adr serve` |
 
 A commit or PR is also a candidate regardless of size if its title/message or

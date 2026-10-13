@@ -1,5 +1,5 @@
 import type { AIProvider, DraftADRInput, DraftADRResult } from "./types.js";
-import { MAX_DIFF_CHARS, SYSTEM_PROMPT, buildUserPrompt } from "./shared.js";
+import { MAX_DIFF_CHARS, SYSTEM_PROMPT, buildUserPrompt, fetchWithRetry } from "./shared.js";
 
 // Last-resort fallback if the live model list can't be fetched. OpenRouter
 // rotates its free lineup, so this can go stale — the real source of truth
@@ -88,7 +88,7 @@ export const openrouterProvider: AIProvider = {
     const model = await resolveModel();
     const diff = input.diff.slice(0, MAX_DIFF_CHARS);
 
-    const res = await fetch(CHAT_URL, {
+    const res = await fetchWithRetry(CHAT_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,

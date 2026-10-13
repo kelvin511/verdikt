@@ -46,10 +46,20 @@ program
     (v) => parseInt(v, 10),
     100
   )
+  .option("--force", "Regenerate ADRs that already exist (overwrites any edits to them)")
+  .option(
+    "--concurrency <n>",
+    "How many ADRs to generate in parallel. Lower it if a free-tier AI provider keeps rate-limiting you.",
+    (v) => parseInt(v, 10),
+    4
+  )
   .action(async (opts) => {
     try {
       if (opts.source !== "git" && opts.source !== "github") {
         throw new Error(`Invalid --source "${opts.source}". Use "git" or "github".`);
+      }
+      if (!Number.isInteger(opts.concurrency) || opts.concurrency < 1) {
+        throw new Error("--concurrency must be a positive whole number.");
       }
       await runScan(opts);
     } catch (err) {

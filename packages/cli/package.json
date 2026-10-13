@@ -1,6 +1,6 @@
 {
   "name": "verdikt-adr",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Turn your git history into readable Architectural Decision Records — local-first, no cloud, works on any repo.",
   "type": "module",
   "bin": {

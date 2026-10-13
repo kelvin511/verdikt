@@ -1,4 +1,4 @@
-import { simpleGit, type SimpleGit } from "simple-git";
+import { simpleGit } from "simple-git";
 import type { Candidate } from "./types.js";
 
 // Unit/record separators — practically never appear in commit metadata, so
@@ -20,6 +20,10 @@ export interface GitScanOptions {
  * computed against each commit's first parent. This is what makes scanning
  * source-independent of GitHub — it works on any git repo, any host, no
  * `gh` required.
+ *
+ * Line counts come from `--numstat` in the same `git log` call (merges diffed
+ * against their first parent) — one subprocess total instead of one per
+ * commit, which is what made large histories slow to scan.
  */
 export async function listGitCandidates(
   repoRoot: string,
@@ -31,7 +35,11 @@ export async function listGitCandidates(
     "log",
     "--all",
     "--date=short",
-    `--pretty=format:%H${FIELD_SEP}%h${FIELD_SEP}%an${FIELD_SEP}%ad${FIELD_SEP}%P${FIELD_SEP}%s${FIELD_SEP}%b${RECORD_SEP}`,
+    "--numstat",
+    "--diff-merges=first-parent",
+    // Record separator leads each record so the numstat lines git prints
+    // after the formatted header land in the same record, as its last field.
+    `--pretty=format:${RECORD_SEP}%H${FIELD_SEP}%h${FIELD_SEP}%an${FIELD_SEP}%ad${FIELD_SEP}%P${FIELD_SEP}%s${FIELD_SEP}%b${FIELD_SEP}`,
   ];
   if (options.since) args.push(`--since=${options.since}`);
   if (options.limit) args.push(`--max-count=${options.limit}`);
@@ -55,7 +63,7 @@ export async function listGitCandidates(
 
   const candidates: Candidate[] = [];
   for (const record of records) {
-    const [fullSha, shortSha, author, date, parentsRaw, subject, body = ""] =
+    const [fullSha, shortSha, author, date, parentsRaw, subject, body = "", numstat = ""] =
       record.split(FIELD_SEP);
     if (!fullSha) continue;
 
@@ -63,7 +71,7 @@ export async function listGitCandidates(
     const isMerge = parents.length > 1;
     const parentSha = parents[0];
 
-    const stat = await diffStat(git, fullSha, isMerge ? parentSha : undefined);
+    const stat = sumNumstat(numstat);
 
     candidates.push({
       source: "git",
@@ -84,20 +92,7 @@ export async function listGitCandidates(
   return candidates;
 }
 
-async function diffStat(
-  git: SimpleGit,
-  sha: string,
-  parentSha?: string
-): Promise<{ additions: number; deletions: number }> {
-  const range = parentSha ? `${parentSha}..${sha}` : `${sha}^..${sha}`;
-  let output: string;
-  try {
-    output = await git.raw(["diff", "--numstat", range]);
-  } catch {
-    // Root commit — no parent to diff against.
-    output = await git.raw(["show", "--numstat", "--format=", sha]);
-  }
-
+function sumNumstat(output: string): { additions: number; deletions: number } {
   let additions = 0;
   let deletions = 0;
   for (const line of output.split("\n")) {

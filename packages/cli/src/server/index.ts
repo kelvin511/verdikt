@@ -26,7 +26,7 @@ export async function startServer({ adrDir, port }: ServerOptions): Promise<void
       res
         .status(503)
         .send(
-          "Dashboard assets not found. Run the package build (npm run build) before publishing/running verdikt serve."
+          "Dashboard assets not found. Run the package build (npm run build) before publishing/running verdikt-adr serve."
         );
     });
   }
