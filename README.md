@@ -77,10 +77,41 @@ retires or renames one (this happened twice while building this feature —
 see [`lib/ai/openrouter.ts`](packages/cli/src/lib/ai/openrouter.ts) and
 [`lib/ai/google.ts`](packages/cli/src/lib/ai/google.ts) for the selection
 logic and hardcoded last-resort fallback). Anthropic uses a fixed alias
-(`claude-opus-5`) since Claude model names don't rotate the same way.
+(`claude-opus-5-5`) since Claude model names don't rotate the same way.
 Override any of this with `VERDIKT_MODEL` to pin an exact model, or force a
 specific provider regardless of what keys are set with `--provider` or
 `VERDIKT_AI_PROVIDER`.
+
+### AI usage examples
+
+```bash
+# Free option: Google Gemini (model picked live from Google's catalog)
+export GEMINI_API_KEY=your-key
+npx verdikt-adr scan --ai
+
+# Free option: OpenRouter
+export OPENROUTER_API_KEY=your-key
+npx verdikt-adr scan --ai --provider openrouter
+
+# Anthropic Claude
+export ANTHROPIC_API_KEY=your-key
+npx verdikt-adr scan --ai --provider anthropic
+
+# Check which of the last 50 commits would get ADRs first (no AI calls, nothing written)
+npx verdikt-adr scan --dry-run --limit 50
+
+# Pin an exact model instead of the live/default pick
+VERDIKT_MODEL=gemini-flash-latest npx verdikt-adr scan --ai --provider google
+
+# Keys can live in a .env file in the directory you run from instead
+echo "GEMINI_API_KEY=your-key" >> .env
+npx verdikt-adr scan --ai --since 2026-01-01
+```
+
+On Windows PowerShell, use `$env:GEMINI_API_KEY="your-key"` instead of `export`.
+If a provider rejects a model (e.g. a `404 ... no longer available` error),
+make sure you're on the latest `verdikt-adr` (`npx verdikt-adr@latest`) — older
+releases hardcoded model names that providers have since retired.
 
 ## CLI reference
 
